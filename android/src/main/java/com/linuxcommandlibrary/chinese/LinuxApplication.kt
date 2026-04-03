@@ -1,4 +1,4 @@
-package com.inspiredandroid.linuxcommandbibliotheca
+package com.linuxcommandlibrary.chinese
 
 import android.app.Application
 import com.linuxcommandlibrary.app.Strings
