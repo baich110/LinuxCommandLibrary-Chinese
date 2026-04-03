@@ -21,9 +21,10 @@ class LinuxApplication : Application() {
         }
         val prefs: PreferencesStorage by inject()
         UserPreferences.initialize(prefs)
-        Strings.currentLanguage = when (UserPreferences.languageCode) {
+        val lang = when (UserPreferences.languageCode) {
             "en" -> Strings.Language.ENGLISH
             else -> Strings.Language.CHINESE
         }
+        Strings.setLanguage(lang)
     }
 }
