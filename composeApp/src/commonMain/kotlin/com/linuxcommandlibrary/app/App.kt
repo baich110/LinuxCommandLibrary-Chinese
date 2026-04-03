@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -142,7 +143,7 @@ fun LinuxApp(initialDeeplink: String? = null) {
         }
 
         // 主界面内容
-        androidx.compose.material3.Scaffold(
+        Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 when {
