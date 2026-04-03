@@ -9,10 +9,7 @@ expect val showAndroidTerminalTip: Boolean
 expect val showFastScrollBar: Boolean
 expect val backIcon: ImageVector
 expect val shareButtonIcon: ImageVector
-
-val shareButtonDescription: String
-    @Composable
-    get() = if (Strings.currentLanguage == Strings.Language.CHINESE) "分享" else "Share"
+expect val shareButtonDescription: String
 
 @Composable
 expect fun rememberOpenAppAction(): (String) -> Unit
