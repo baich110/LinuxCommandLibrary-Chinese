@@ -1,4 +1,6 @@
 package com.linuxcommandlibrary.app.data
+import com.linuxcommandlibrary.app.Strings
+import com.linuxcommandlibrary.app.Translations
 
 import com.linuxcommandlibrary.shared.BasicInfo
 import com.linuxcommandlibrary.shared.MarkdownParser
@@ -15,8 +17,13 @@ class BasicsRepository(private val assetReader: AssetReader) {
             .mapNotNull { filename ->
                 val id = filename.removeSuffix(".md")
                 val title = readCategoryTitle(filename)
-                if (title != null) {
-                    BasicCategory(id = id, title = title)
+                val finalTitle = if (Strings.currentLanguage == Strings.Language.CHINESE) {
+                    Translations.translateBasicsCategory(id) ?: title
+                } else {
+                    title
+                }
+                if (finalTitle != null) {
+                    BasicCategory(id = id, title = finalTitle)
                 } else {
                     null
                 }
