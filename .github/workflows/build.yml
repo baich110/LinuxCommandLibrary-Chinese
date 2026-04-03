@@ -1,5 +1,4 @@
 name: Build APKs
-
 on:
   workflow_dispatch:
   push:
@@ -12,7 +11,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        
+
       - name: Setup JDK
         uses: actions/setup-java@v5
         with:
@@ -29,6 +28,9 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew :android:assembleDebug --no-daemon
 
+      - name: Build Release APK
+        run: ./gradlew :android:assembleRelease --no-daemon
+
       - name: Show outputs
         run: |
           echo "=== Checking build outputs ==="
@@ -42,4 +44,13 @@ jobs:
           name: LinuxCommandLibrary-debug
           path: |
             android/build/outputs/apk/debug/*.apk
-          retention-days: 5
+          retention-days: 30
+
+      - name: Upload Release APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: LinuxCommandLibrary-release
+          path: |
+            android/build/outputs/apk/release/*.apk
+          retention-days: 30
