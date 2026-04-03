@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.linuxcommandlibrary.app.Strings
-import com.linuxcommandlibrary.app.resources.Res
 import org.jetbrains.compose.resources.painterResource
+import com.linuxcommandlibrary.app.resources.Res
 
 @Composable
 fun WelcomeDialog(onAgree: () -> Unit, onLanguageSelected: (Strings.Language) -> Unit) {
