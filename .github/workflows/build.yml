@@ -27,16 +27,19 @@ jobs:
           chmod +x gradlew
           
       - name: Build Debug APK
-        run: ./gradlew :android:assembleDebug --no-daemon --stacktrace 2>&1 | tail -50
+        run: ./gradlew :android:assembleDebug --no-daemon
 
-      - name: Find APK files
-        run: find . -name "*.apk" -type f 2>/dev/null || echo "No APKs found"
-
+      - name: Show outputs
+        run: |
+          echo "=== Checking build outputs ==="
+          ls -la android/build/outputs/ 2>/dev/null || echo "outputs dir not found"
+          find android -name "*.apk" -type f 2>/dev/null || echo "No APKs found"
+          
       - name: Upload Debug APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: debug-apk
+          name: LinuxCommandLibrary-debug
           path: |
             android/build/outputs/apk/debug/*.apk
-            android/build/outputs/**/*.apk
-          if-no-files-found: warn
+          retention-days: 5
