@@ -5,9 +5,6 @@ on:
   push:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     name: Build APKs
@@ -26,15 +23,14 @@ jobs:
         run: chmod +x gradlew
         
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        
-      - name: Install Android Build Tools
-        run: sdkmanager "build-tools;29.0.3"
-        
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y android-sdk
+          
       - name: Build Debug APK
         run: bash ./gradlew assembleDebug --stacktrace
         
-      - name: Build Release APK (unsigned)
+      - name: Build Release APK
         run: bash ./gradlew assembleRelease --stacktrace || true
         
       - name: Rename Release APK
