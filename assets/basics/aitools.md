@@ -1,0 +1,57 @@
+# AI tools
+
+## Coding Agents
+```[claude](/man/claude)```
+```[opencode](/man/opencode)```
+```[copilot](/man/copilot)```
+```[grok](/man/grok)```
+```[gemini](/man/gemini)```
+```[codex](/man/codex)```
+```[interpreter](/man/interpreter)```
+```[aider](/man/aider)```
+```[forge](/man/forge)```
+```[vibe](/man/vibe)```
+```[crush](/man/crush)```
+```[plandex](/man/plandex)```
+```[qwen-code](/man/qwen-code)```
+```[q](/man/q)```
+```[droid](/man/droid)```
+```[kimi](/man/kimi)```
+```[bondai](/man/bondai)```
+```[tabby](/man/tabby)```
+```[cline](/man/cline)```
+```[ra-aid](/man/ra-aid)```
+
+## AI Assistants
+```[openclaw](/man/openclaw)```
+```[zeroclaw](/man/zeroclaw)```
+```[nanobot](/man/nanobot)```
+```[picoclaw](/man/picoclaw)```
+```[nanoclaw](/man/nanoclaw)```
+```[nullclaw](/man/nullclaw)```
+```[leon](/man/leon)```
+
+## Image Generation
+```[sd-cli](/man/sd-cli)```
+```[mflux](/man/mflux)```
+```[comfyui](/man/comfyui)```
+
+## Speech & Audio AI
+```[whisper](/man/whisper)```
+```[faster-whisper](/man/faster-whisper)```
+```[deepspeech](/man/deepspeech)```
+```[piper](/man/piper)```
+```[bark](/man/bark)```
+```[tts](/man/tts)```
+
+## Local LLM Runners
+```[ollama](/man/ollama)```
+```[llamafile](/man/llamafile)```
+```[llama.cpp](/man/llama.cpp)```
+
+## AI Terminal Utilities
+```[mods](/man/mods)```
+```[aichat](/man/aichat)```
+```[smartcat](/man/smartcat)```
+```[llm](/man/llm)```
+```[sgpt](/man/sgpt)```
