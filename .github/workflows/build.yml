@@ -1,0 +1,54 @@
+name: Build APKs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build APKs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          
+      - name: Set execution flag for gradlew
+        run: chmod +x gradlew
+        
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        
+      - name: Install Android Build Tools
+        run: sdkmanager "build-tools;29.0.3"
+        
+      - name: Build Debug APK
+        run: bash ./gradlew assembleDebug --stacktrace
+        
+      - name: Build Release APK (unsigned)
+        run: bash ./gradlew assembleRelease --stacktrace || true
+        
+      - name: Rename Release APK
+        run: |
+          if [ -f android/build/outputs/apk/release/android-release.apk ]; then
+            mv android/build/outputs/apk/release/android-release.apk android/build/outputs/apk/release/LinuxCommandLibrary-release-unsigned.apk
+          fi
+          
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: android/build/outputs/apk/debug/android-debug.apk
+          
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: android/build/outputs/apk/release/LinuxCommandLibrary-release-unsigned.apk
+          if-no-files-found: ignore
