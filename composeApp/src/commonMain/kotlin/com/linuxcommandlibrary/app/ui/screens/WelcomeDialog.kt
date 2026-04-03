@@ -18,8 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.linuxcommandlibrary.app.Strings
-import org.jetbrains.compose.resources.painterResource
-import com.linuxcommandlibrary.app.resources.Res
 
 @Composable
 fun WelcomeDialog(onAgree: () -> Unit, onLanguageSelected: (Strings.Language) -> Unit) {
@@ -30,8 +28,6 @@ fun WelcomeDialog(onAgree: () -> Unit, onLanguageSelected: (Strings.Language) ->
     ) {
         Card(modifier = Modifier.fillMaxWidth(0.92f).fillMaxHeight(0.88f), elevation = CardDefaults.cardElevation(defaultElevation = 16.dp), shape = RoundedCornerShape(24.dp)) {
             Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(painter = painterResource(Res.drawable.app_logo), contentDescription = null, modifier = Modifier.size(80.dp).clip(RoundedCornerShape(16.dp)))
-                Spacer(Modifier.height(16.dp))
                 Text(text = Strings.WelcomeDialogStrings.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(4.dp))
                 Text(text = Strings.WelcomeDialogStrings.subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), textAlign = TextAlign.Center)
