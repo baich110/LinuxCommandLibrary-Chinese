@@ -19,14 +19,15 @@ jobs:
           distribution: temurin
           java-version: "17"
           
-      - name: Set execution flag for gradlew
-        run: chmod +x gradlew
-        
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        
+      - name: Download Gradle
+        run: |
+          cd gradle/wrapper
+          curl -sL -o gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.1/gradle/wrapper/gradle-wrapper.jar
+          cd ../..
+          chmod +x gradlew
+          
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tail -50
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
