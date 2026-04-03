@@ -1,6 +1,6 @@
 package com.linuxcommandlibrary.app.ui.screens
-import com.linuxcommandlibrary.app.Strings
 
+import com.linuxcommandlibrary.app.Strings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -55,11 +57,13 @@ fun AppInfoDialog(
 ) {
     val uriHandler = LocalUriHandler.current
     val githubPainter = rememberIconPainter(AppIcon.GITHUB)
-
+    val dialogClose = if (Strings.currentLanguage == Strings.Language.CHINESE) "关闭应用信息对话框" else "Close app info dialog"
+    
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
             elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
             shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.semantics { contentDescription = dialogClose },
         ) {
             Column(
                 modifier = Modifier
@@ -70,7 +74,7 @@ fun AppInfoDialog(
             ) {
                 Image(
                     painter = painterResource(Res.drawable.app_logo),
-                    contentDescription = null,
+                    contentDescription = Strings.appInfoDialog.appName,
                     modifier = Modifier.size(72.dp).clip(RoundedCornerShape(16.dp)),
                 )
                 Spacer(Modifier.height(12.dp))
@@ -84,9 +88,7 @@ fun AppInfoDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
-
                 Spacer(Modifier.height(20.dp))
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth(),
@@ -94,7 +96,7 @@ fun AppInfoDialog(
                     if (showRateAppButton) {
                         Button(
                             onClick = {
-                                uriHandler.openUri("https://play.google.com/store/apps/details?id=com.inspiredandroid.linuxcommandbibliotheca")
+                                uriHandler.openUri("https://play.google.com/store/apps/details?id=com.linuxcommandlibrary.chinese")
                             },
                             modifier = Modifier.weight(1f).pointerHoverIcon(PointerIcon.Hand),
                             shape = RoundedCornerShape(12.dp),
@@ -106,7 +108,7 @@ fun AppInfoDialog(
                     }
                     OutlinedButton(
                         onClick = {
-                            uriHandler.openUri("https://github.com/SimonSchubert/LinuxCommandLibrary")
+                            uriHandler.openUri("https://github.com/baich110/LinuxCommandLibrary-Chinese")
                         },
                         modifier = Modifier.weight(1f).pointerHoverIcon(PointerIcon.Hand),
                         shape = RoundedCornerShape(12.dp),
@@ -120,7 +122,6 @@ fun AppInfoDialog(
                         Text(Strings.appInfoDialog.github)
                     }
                 }
-
                 Spacer(Modifier.height(20.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
                 Spacer(Modifier.height(20.dp))
@@ -153,9 +154,12 @@ fun AppInfoDialog(
                 }
                 Spacer(Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    val protonText = if (Strings.currentLanguage == Strings.Language.CHINESE) "Proton 免费版" else "Proton Free"
+                    val linodeText = if (Strings.currentLanguage == Strings.Language.CHINESE) "Linode 云服务" else "Linode Cloud"
+                    
                     Image(
                         painter = painterResource(Res.drawable.af_proton),
-                        contentDescription = "Proton Free",
+                        contentDescription = protonText,
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
@@ -166,7 +170,7 @@ fun AppInfoDialog(
                     )
                     Image(
                         painter = painterResource(Res.drawable.af_linode),
-                        contentDescription = "Linode Cloud",
+                        contentDescription = linodeText,
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
@@ -176,9 +180,7 @@ fun AppInfoDialog(
                             },
                     )
                 }
-
                 Spacer(Modifier.height(24.dp))
-
                 Text(
                     Strings.appInfoDialog.acknowledgements,
                     style = MaterialTheme.typography.titleMedium,
@@ -191,7 +193,7 @@ fun AppInfoDialog(
                     fontWeight = FontWeight.Medium,
                 )
                 Text(
-                    "Licence information about the man page is usually specified in the man detail page under the category Author, Copyright or Licence.",
+                    Strings.appInfoDialog.manPagesLicense,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
@@ -202,7 +204,7 @@ fun AppInfoDialog(
                     fontWeight = FontWeight.Medium,
                 )
                 Text(
-                    "The MIT License (MIT) Copyright (c) 2014 the TLDR team and contributors",
+                    Strings.appInfoDialog.tldrLicense,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
@@ -223,13 +225,14 @@ fun BookmarkFeedbackDialog(onDismiss: () -> Unit) {
         delay(600)
         onDismiss()
     }
-
     val bookmarkPainter = rememberIconPainter(AppIcon.BOOKMARK)
-
+    val bookmarkText = if (Strings.currentLanguage == Strings.Language.CHINESE) "收藏成功" else "Bookmarked"
+    
     Dialog(onDismissRequest = onDismiss) {
         Card(
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             shape = RoundedCornerShape(6.dp),
+            modifier = Modifier.semantics { contentDescription = bookmarkText },
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -237,12 +240,10 @@ fun BookmarkFeedbackDialog(onDismiss: () -> Unit) {
             ) {
                 Icon(
                     painter = bookmarkPainter,
-                    contentDescription = null,
+                    contentDescription = bookmarkText,
                     modifier = Modifier.size(48.dp),
                 )
-
                 Spacer(Modifier.height(8.dp))
-
                 SectionTitle(title = Strings.bookmarkFeedback.bookmarked)
             }
         }

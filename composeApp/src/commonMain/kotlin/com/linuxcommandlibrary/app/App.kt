@@ -1,8 +1,7 @@
 package com.linuxcommandlibrary.app
+
 import com.linuxcommandlibrary.shared.platform.UserPreferences
 import com.linuxcommandlibrary.app.ui.screens.WelcomeDialog
-import com.linuxcommandlibrary.app.Strings
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,11 +11,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.composable
@@ -57,6 +57,7 @@ import org.koin.core.parameter.parametersOf
 fun App(initialDeeplink: String? = null) {
     val reviewHandler: ReviewHandler = koinInject()
     val commandsRepository: CommandsRepository = koinInject()
+
     LaunchedEffect(Unit) {
         reviewHandler.incrementAppStartCount()
         reviewHandler.requestReviewIfNeeded()
@@ -82,11 +83,19 @@ fun LinuxApp(initialDeeplink: String? = null) {
     val initialRoute = remember(initialDeeplink) {
         parseDeeplink(initialDeeplink) ?: Route.Basics
     }
-
     val searchState = rememberSearchState()
-
     val openAppAction = rememberOpenAppAction()
-    var showWelcome by remember { mutableStateOf(true) }
+    
+    // 初始化语言设置
+    LaunchedEffect(Unit) {
+        val savedLang = UserPreferences.languageCode
+        val lang = Strings.Language.entries.find { it.code == savedLang } ?: Strings.Language.CHINESE
+        Strings.setLanguage(lang)
+    }
+    
+    // 检查是否已完成欢迎流程
+    var showWelcome by remember { mutableStateOf(!UserPreferences.hasCompletedWelcomeFlow) }
+    
     val onNavigate: (NavEvent) -> Unit = remember(navController, openAppAction) {
         { event ->
             when (event) {
@@ -116,120 +125,137 @@ fun LinuxApp(initialDeeplink: String? = null) {
         koinInject { parametersOf(it) }
     }
 
-    Scaffold(
-    if (showWelcome) { WelcomeDialog(onAgree = { showWelcome = false; com.linuxcommandlibrary.shared.platform.UserPreferences.completeWelcomeFlow(); com.linuxcommandlibrary.shared.platform.UserPreferences.languageCode = Strings.currentLanguage.code }, onLanguageSelected = { lang -> Strings.setLanguage(lang); com.linuxcommandlibrary.shared.platform.UserPreferences.languageCode = lang.code }) }
-    Scaffold(
-        topBar = {
-            when {
-                isOnCommands || isOnBasics -> {
-                    SearchTopBar(
-                        title = if (isOnBasics) Strings.basics else Strings.commands,
-                        searchState = searchState,
-                    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 欢迎弹窗
+        if (showWelcome) {
+            WelcomeDialog(
+                onAgree = {
+                    showWelcome = false
+                    UserPreferences.completeWelcomeFlow()
+                    UserPreferences.languageCode = Strings.currentLanguage.code
+                },
+                onLanguageSelected = { lang ->
+                    Strings.setLanguage(lang)
+                    UserPreferences.languageCode = lang.code
                 }
+            )
+        }
 
-                isOnCommandDetail && currentCommandName != null -> {
-                    commandDetailViewModel?.let { viewModel ->
-                        DetailTopBar(
-                            commandName = currentCommandName,
-                            viewModel = viewModel,
+        // 主界面内容
+        androidx.compose.material3.Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                when {
+                    isOnCommands || isOnBasics -> {
+                        SearchTopBar(
+                            title = if (isOnBasics) Strings.basics else Strings.commands,
+                            searchState = searchState,
+                        )
+                    }
+
+                    isOnCommandDetail && currentCommandName != null -> {
+                        commandDetailViewModel?.let { viewModel ->
+                            DetailTopBar(
+                                commandName = currentCommandName,
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() },
+                            )
+                        }
+                    }
+
+                    else -> {
+                        val title = when {
+                            isOnTips -> Strings.tips
+                            isOnBasicGroups -> {
+                                navBackStackEntry?.toRoute<Route.BasicGroups>()?.categoryTitle ?: ""
+                            }
+                            else -> ""
+                        }
+                        val showBackIcon = !isOnTips
+                        val showAppInfoIcon = isOnTips
+
+                        GenericTopBar(
+                            title = title,
+                            showBackIcon = showBackIcon,
                             onBack = { navController.popBackStack() },
+                            showAppInfoIcon = showAppInfoIcon,
                         )
                     }
                 }
-
-                else -> {
-                    val title = when {
-                        isOnTips -> Strings.tips
-
-                        isOnBasicGroups -> {
-                            navBackStackEntry?.toRoute<Route.BasicGroups>()?.categoryTitle ?: ""
+            },
+            bottomBar = {
+                BottomBar(
+                    currentDestination = currentRoute,
+                    onSelectTab = { route ->
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-
-                        else -> ""
+                        searchState.clear()
+                    },
+                )
+            },
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+            ) {
+                AppNavHost(
+                    navController = navController,
+                    startDestination = initialRoute,
+                ) {
+                    composable<Route.Basics> {
+                        val viewModel: BasicCategoriesViewModel = koinInject()
+                        BasicCategoriesScreen(viewModel = viewModel, onNavigate = onNavigate)
                     }
-                    val showBackIcon = !isOnTips
-                    val showAppInfoIcon = isOnTips
-                    GenericTopBar(
-                        title = title,
-                        showBackIcon = showBackIcon,
-                        onBack = { navController.popBackStack() },
-                        showAppInfoIcon = showAppInfoIcon,
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            BottomBar(
-                currentDestination = currentRoute,
-                onSelectTab = { route ->
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+
+                    composable<Route.Commands> {
+                        val viewModel: CommandListViewModel = koinInject()
+                        CommandListScreen(viewModel = viewModel, onNavigate = onNavigate)
+                    }
+                    composable<Route.Tips> {
+                        val viewModel: TipsViewModel = koinInject()
+                        TipsScreen(viewModel = viewModel, onNavigate = onNavigate)
+                    }
+
+                    composable<Route.BasicGroups> { backStackEntry ->
+                        val route = backStackEntry.toRoute<Route.BasicGroups>()
+                        val basicsRepository: BasicsRepository = koinInject()
+
+                        if (basicsRepository.usesCardLayout(route.categoryId)) {
+                            val viewModel: BasicEditorViewModel = koinInject { parametersOf(route.categoryId) }
+                            BasicEditorScreen(viewModel = viewModel, onNavigate = onNavigate)
+                        } else {
+                            val viewModel: BasicGroupsViewModel = koinInject { parametersOf(route.categoryId) }
+                            BasicGroupsScreen(viewModel = viewModel, onNavigate = onNavigate)
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
-                    searchState.clear()
-                },
-            )
-        },
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding),
-        ) {
-            AppNavHost(
-                navController = navController,
-                startDestination = initialRoute,
-            ) {
-                composable<Route.Basics> {
-                    val viewModel: BasicCategoriesViewModel = koinInject()
-                    BasicCategoriesScreen(viewModel = viewModel, onNavigate = onNavigate)
-                }
 
-                composable<Route.Commands> {
-                    val viewModel: CommandListViewModel = koinInject()
-                    CommandListScreen(viewModel = viewModel, onNavigate = onNavigate)
-                }
-
-                composable<Route.Tips> {
-                    val viewModel: TipsViewModel = koinInject()
-                    TipsScreen(viewModel = viewModel, onNavigate = onNavigate)
-                }
-
-                composable<Route.BasicGroups> { backStackEntry ->
-                    val route = backStackEntry.toRoute<Route.BasicGroups>()
-                    val basicsRepository: BasicsRepository = koinInject()
-                    if (basicsRepository.usesCardLayout(route.categoryId)) {
-                        val viewModel: BasicEditorViewModel = koinInject { parametersOf(route.categoryId) }
-                        BasicEditorScreen(viewModel = viewModel, onNavigate = onNavigate)
-                    } else {
-                        val viewModel: BasicGroupsViewModel = koinInject { parametersOf(route.categoryId) }
-                        BasicGroupsScreen(viewModel = viewModel, onNavigate = onNavigate)
+                    composable<Route.CommandDetail> {
+                        commandDetailViewModel?.let { viewModel ->
+                            CommandDetailScreen(viewModel = viewModel, onNavigate = onNavigate)
+                        }
                     }
                 }
 
-                composable<Route.CommandDetail> {
-                    commandDetailViewModel?.let { viewModel ->
-                        CommandDetailScreen(viewModel = viewModel, onNavigate = onNavigate)
+                val isSearchVisible = searchState.searchText.isNotEmpty() && !isOnCommandDetail
+                AnimatedVisibility(
+                    visible = isSearchVisible,
+                    enter = fadeIn(animationSpec = tween(300)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 300, delayMillis = 300)),
+                ) {
+                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                        val searchViewModel: SearchViewModel = koinInject()
+                        SearchScreen(
+                            searchText = searchState.searchText,
+                            viewModel = searchViewModel,
+                            onNavigate = onNavigate,
+                        )
                     }
-                }
-            }
-
-            val isSearchVisible = searchState.searchText.isNotEmpty() && !isOnCommandDetail
-            AnimatedVisibility(
-                visible = isSearchVisible,
-                enter = fadeIn(animationSpec = tween(300)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 300, delayMillis = 300)),
-            ) {
-                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                    val searchViewModel: SearchViewModel = koinInject()
-                    SearchScreen(
-                        searchText = searchState.searchText,
-                        viewModel = searchViewModel,
-                        onNavigate = onNavigate,
-                    )
                 }
             }
         }
@@ -238,24 +264,18 @@ fun LinuxApp(initialDeeplink: String? = null) {
 
 private fun parseDeeplink(url: String?): Route? {
     if (url == null) return null
-
     return when {
         url.endsWith("/basics.html") || url.endsWith("/basics") -> Route.Basics
-
         url.endsWith("/tips.html") || url.endsWith("/tips") -> Route.Tips
-
         url.contains("/man/") -> {
             val commandName = url.substringAfterLast("/man/").removeSuffix(".html")
             Route.CommandDetail(commandName)
         }
-
         url.contains("/basic/") -> {
             val categoryId = url.substringAfterLast("/basic/").removeSuffix(".html")
             Route.BasicGroups(categoryId, categoryId)
         }
-
         url.endsWith("/") || url.endsWith("/index.html") -> Route.Commands
-
         else -> null
     }
 }

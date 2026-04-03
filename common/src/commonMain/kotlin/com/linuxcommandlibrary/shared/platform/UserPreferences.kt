@@ -21,5 +21,8 @@ object UserPreferences {
         get() = getStorage().getBoolean(KEY_FIRST_LAUNCH, true)
         set(value) = getStorage().putBoolean(KEY_FIRST_LAUNCH, value)
     
+    val hasCompletedWelcomeFlow: Boolean
+        get() = !isFirstLaunch || agreementAccepted
+    
     fun completeWelcomeFlow() { isFirstLaunch = false; agreementAccepted = true }
 }

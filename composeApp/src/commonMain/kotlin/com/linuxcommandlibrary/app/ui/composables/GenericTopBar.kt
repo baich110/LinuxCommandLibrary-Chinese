@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.linuxcommandlibrary.app.Strings
 import com.linuxcommandlibrary.app.platform.backIcon
 import com.linuxcommandlibrary.app.ui.AppIcons
 import com.linuxcommandlibrary.app.ui.screens.AppInfoDialog
@@ -42,13 +43,16 @@ fun GenericTopBar(
     showAppInfoIcon: Boolean,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    
+    val backText = if (Strings.currentLanguage == Strings.Language.CHINESE) "返回" else "Back"
+    val infoText = if (Strings.currentLanguage == Strings.Language.CHINESE) "应用信息" else "App info"
 
     TopAppBar(
         expandedHeight = 56.dp,
         title = {
             Text(
                 title,
-                modifier = Modifier.semantics { contentDescription = "TopAppBarTitle" },
+                modifier = Modifier.semantics { contentDescription = "标题: $title" },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -62,7 +66,7 @@ fun GenericTopBar(
                 ) {
                     Icon(
                         imageVector = backIcon,
-                        contentDescription = "Back",
+                        contentDescription = backText,
                     )
                 }
             }
@@ -75,7 +79,7 @@ fun GenericTopBar(
                 ) {
                     Icon(
                         imageVector = AppIcons.Info,
-                        contentDescription = "Info",
+                        contentDescription = infoText,
                     )
                 }
             }

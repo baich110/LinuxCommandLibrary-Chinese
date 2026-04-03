@@ -1,10 +1,8 @@
 package com.linuxcommandlibrary.app.ui.composables
-import com.linuxcommandlibrary.app.Strings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,22 +24,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import com.linuxcommandlibrary.app.Route
+import com.linuxcommandlibrary.app.Strings
 import com.linuxcommandlibrary.app.ui.theme.LocalCustomColors
 
 private data class BottomTab(
     val route: Route,
     val title: String,
     val icon: AppIcon,
+    val contentDescZh: String,
+    val contentDescEn: String,
 )
 
 private val bottomTabs = listOf(
-    BottomTab(Route.Basics, "", AppIcon.PUZZLE),
-    BottomTab(Route.Tips, "", AppIcon.IDEA),
-    BottomTab(Route.Commands, "", AppIcon.SEARCH),
+    BottomTab(Route.Basics, "", AppIcon.PUZZLE, "基础分类", "Basics category"),
+    BottomTab(Route.Tips, "", AppIcon.IDEA, "技巧提示", "Tips section"),
+    BottomTab(Route.Commands, "", AppIcon.SEARCH, "命令搜索", "Commands search"),
 )
 
 @Composable
@@ -51,7 +54,7 @@ fun BottomBar(
 ) {
     val selectedColor = MaterialTheme.colorScheme.primary
     val unselectedColor = MaterialTheme.colorScheme.onSurface
-
+    
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,43 +67,45 @@ fun BottomBar(
                 .defaultMinSize(minHeight = 56.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            bottomTabs.forEach { tab ->
+            bottomTabs.forEachIndexed { index, tab ->
                 val isSelected = when (tab.route) {
                     Route.Basics -> currentDestination?.hasRoute<Route.Basics>() == true ||
                         currentDestination?.hasRoute<Route.BasicGroups>() == true
-
                     Route.Commands -> currentDestination?.hasRoute<Route.Commands>() == true
-
                     Route.Tips -> currentDestination?.hasRoute<Route.Tips>() == true
-
                     else -> false
                 }
                 val tint = if (isSelected) selectedColor else unselectedColor
-
-                Box(
+                val contentDesc = if (Strings.currentLanguage == Strings.Language.CHINESE) tab.contentDescZh else tab.contentDescEn
+                
+                Column(
                     modifier = Modifier
                         .weight(1f)
                         .defaultMinSize(minHeight = 56.dp)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                         ) { onSelectTab(tab.route) }
-                        .pointerHoverIcon(PointerIcon.Hand),
-                    contentAlignment = Alignment.Center,
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .semantics { contentDescription = contentDesc },
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            painter = rememberIconPainter(tab.icon),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = tint,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = when (index) { 0 -> Strings.basics; 1 -> Strings.tips; 2 -> Strings.commands; else -> "" }
-                            color = tint,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                    }
+                    Icon(
+                        painter = rememberIconPainter(tab.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = tint,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = when (index) {
+                            0 -> Strings.basics
+                            1 -> Strings.tips
+                            2 -> Strings.commands
+                            else -> ""
+                        },
+                        color = tint,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
                 }
             }
         }
